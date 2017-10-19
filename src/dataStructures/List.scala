@@ -6,16 +6,14 @@ case class Cons[A](head:A, tail:List[A]) extends List[A]
 
 object List {
 
-  def sum(xs:List[Int]) : Int = xs match {
-      case Nil => 0
-      case Cons(x, xy) => x + sum(xy)
-    }
-
-  def product(xs:List[Double]) : Double = xs match {
-    case Nil => 1.0
-    case Cons(0.0, _) => 0.0
-    case Cons(a, ab) => a * product(ab)
+  def foldRight[A, B](xs: List[A],z:B)(f: (A,B) => B) : B = xs match {
+    case Nil => z
+    case Cons(x, xy) => f(x, foldRight(xy,z)(f))
   }
+
+  def sum(xs:List[Int]) : Int = foldRight(xs, 0)(_ + _)
+  def product(xs:List[Double]) : Double = foldRight(xs, 0.0)(_*_)
+  def length[A](xs:List[A]) : Int = foldRight(xs, 0)((_, acc) => 1 + acc)
 
   // Tail of Nil being Nil is probably wrong. Could return an option here,
   // but for now just return an empty list
