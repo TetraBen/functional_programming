@@ -73,15 +73,45 @@ object List {
 
   def map[A,B](xs: List[A])(f: A => B) : List[B] = foldRight(xs, Nil:List[B])((head, tail) => Cons(f(head),tail))
 
+  def flatMap[A,B](as: List[A])(f: A => List[B]) : List[B] = foldRight(as, Nil:List[B])((h,t) => append(f(h),t))
+
   def add1(xs:List[Int]) : List[Int] = map(xs)(_ + 1)
+
   def doubleToString(xs:List[Double]) : List[String] = map(xs)(_.toString)
+
   def filter[A](xs: List[A])(f: A => Boolean) : List[A] =
+
     foldRight(xs, Nil:List[A])((head, tail) =>
       if (f(head)) Cons(head, tail) else tail
     )
 
+  def flatFilter[A](xs: List[A])(f: A => Boolean) : List[A] = flatMap(xs)((x) => if(f(x)) List(x) else Nil)
+
   def filterOdd(x:List[Int]) : List[Int] = filter(x)(_ % 2 == 0)
 
+  def zipWith[A,B](as:List[A],xs: List[A])(f: (A,A) => B) : List[B] = (as,xs) match {
+    case (Nil, Nil) => Nil
+    case (Cons(a,at), Cons(b,bt) ) => Cons(f(a,b), zipWith(at,bt)(f))
+    case _ => throw new Error("mismatched lists")
+  }
+
+  def hasSubsequence[A](sup: List[A], sub:List[A]): Boolean = {
+
+    def isSubsequence[A](a: A, b:A) : Boolean = a match {
+      case Cons(x, xy) => b match {
+        case Cons(c, cd) => if (c == x) isSubsequence(xy, cd) else false
+        case Nil => true
+      }
+      case Nil => b == Nil
+    }
+
+    sup match {
+      case Cons(h, t) => if (isSubsequence(sup, sub)) true else hasSubsequence(t, sub)
+      case Nil => sub == Nil
+    }
+  }
+
+  def zipAdd(as: List[Int], ab: List[Int]) = zipWith(as, ab)((x,y) => x + y)
 
   def init[A](l: List[A]) : List[A] = l match {
       case Cons(_, Nil) => Nil
